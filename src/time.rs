@@ -1,6 +1,7 @@
 #![allow(clippy::missing_safety_doc)]
 
 #[derive(Clone, Hash, PartialEq, Eq)]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[repr(transparent)]
 /// RFC3339 timestamp
 pub struct Timestamp(String);
