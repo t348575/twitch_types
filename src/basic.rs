@@ -5,6 +5,22 @@ manual_braid! {
 }
 impl_extra!(numeric, UserId, UserIdRef);
 
+#[cfg(feature = "utoipa")]
+impl<'__s> utoipa::ToSchema<'__s> for UserId {
+    fn aliases() -> Vec<(&'__s str, utoipa::openapi::schema::Schema)> {
+        vec![]
+    }
+
+    fn schema() -> (
+        &'__s str,
+        utoipa::openapi::RefOr<utoipa::openapi::schema::Schema>,
+    ) {
+        ("UserId", utoipa::openapi::ObjectBuilder::new()
+            .schema_type(utoipa::openapi::SchemaType::String)
+            .into())
+    }
+}
+
 manual_braid! {
     /// A users display name
     pub struct DisplayName;
