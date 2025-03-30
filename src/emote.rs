@@ -211,15 +211,11 @@ impl EmoteUrlBuilder<'_> {
             let custom_template = |builder: &EmoteUrlBuilder| -> Option<String> {
                 let mut template = self.template.clone().into_owned();
                 let emote_id_range = template.find("{{id}}")?;
-                eprintln!("id");
                 template.replace_range(emote_id_range..emote_id_range+"{{id}}".len(), builder.id.as_str());
-                eprintln!("format");
                 let format_range = template.find("{{format}}")?;
                 template.replace_range(format_range..format_range+"{{format}}".len(), &builder.animation_setting.as_ref().map(|s| s.to_string()).unwrap_or_else(|| String::from("default")));
-                eprintln!("theme_mode");
                 let theme_mode_range = template.find("{{theme_mode}}")?;
                 template.replace_range(theme_mode_range..theme_mode_range+"{{theme_mode}}".len(), &builder.theme_mode.to_string());
-                eprintln!("scale");
                 let scale_range = template.find("{{scale}}")?;
                 template.replace_range(scale_range..scale_range+"{{scale}}".len(), &builder.scale.to_string());
                 if template.contains("{{") || template.contains("}}") {
@@ -260,7 +256,7 @@ impl_extra!(EmoteSetId, EmoteSetIdRef);
 )]
 #[cfg_attr(feature = "deny_unknown_fields", serde(deny_unknown_fields))]
 #[non_exhaustive]
-pub struct ResubscriptionEmote {
+pub struct EmoteOccurrence {
     /// The index of where the Emote starts in the text.
     pub begin: i64,
     /// The index of where the Emote ends in the text.
@@ -269,11 +265,15 @@ pub struct ResubscriptionEmote {
     pub id: EmoteId,
 }
 
-impl std::fmt::Display for ResubscriptionEmote {
+impl std::fmt::Display for EmoteOccurrence {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}:{}-{}", self.id, self.begin, self.end)
     }
 }
+
+/// An emote index as defined by eventsub, similar to IRC `emotes` twitch tag.
+#[deprecated(since = "0.4.8", note = "Use EmoteOccurrence instead")]
+pub type ResubscriptionEmote = EmoteOccurrence;
 
 /// Links to the same image of different sizes
 #[derive(Clone, Debug, PartialEq, Eq)]

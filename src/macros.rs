@@ -9,7 +9,76 @@ macro_rules! manual_braid {
         $(#[$_unused_meta:meta])*
         $visref:vis struct $Borrowed:ident;
 
-      ) => {
+    ) => {
+        manual_braid! {
+            @common
+
+            $(#[$meta])*
+
+            $vis struct $Owned;
+            $(#[$_unused_meta])*
+            $visref struct $Borrowed;
+        }
+
+        impl ::std::fmt::Debug for $Owned {
+            #[inline]
+            fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+                <$Borrowed as ::std::fmt::Debug>::fmt(::std::ops::Deref::deref(self), f)
+            }
+        }
+
+        impl ::std::fmt::Debug for $Borrowed {
+            #[inline]
+            fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+                <str as ::std::fmt::Debug>::fmt(&self.0, f)
+            }
+        }
+    };
+
+    (
+        redact($redacted_type:literal);
+
+        $(#[$meta:meta])*
+
+        $vis:vis struct $Owned:ident;
+        $(#[$_unused_meta:meta])*
+        $visref:vis struct $Borrowed:ident;
+
+    ) => {
+        manual_braid! {
+            @common
+
+            $(#[$meta])*
+
+            $vis struct $Owned;
+            $(#[$_unused_meta])*
+            $visref struct $Borrowed;
+        }
+
+        impl ::std::fmt::Debug for $Owned {
+            #[inline]
+            fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+                f.write_str(concat!("[redacted ", $redacted_type, "]"))
+            }
+        }
+
+        impl ::std::fmt::Debug for $Borrowed {
+            #[inline]
+            fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+                f.write_str(concat!("[redacted ", $redacted_type, "]"))
+            }
+        }
+    };
+
+    (
+        @common
+        $(#[$meta:meta])*
+
+        $vis:vis struct $Owned:ident;
+        $(#[$_unused_meta:meta])*
+        $visref:vis struct $Borrowed:ident;
+
+    ) => {
 
         $(#[$meta])*
         #[derive(Clone, Hash, PartialEq, Eq)]
@@ -157,13 +226,6 @@ macro_rules! manual_braid {
             }
         }
 
-        impl ::std::fmt::Debug for $Owned {
-            #[inline]
-            fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
-                <$Borrowed as ::std::fmt::Debug>::fmt(::std::ops::Deref::deref(self), f)
-            }
-        }
-
         impl ::std::fmt::Display for $Owned {
             #[inline]
             fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
@@ -181,7 +243,7 @@ macro_rules! manual_braid {
         impl ::std::cmp::PartialOrd for $Owned {
             #[inline]
             #[allow(unknown_lints)]
-            #[allow(clippy::incorrect_partial_ord_impl_on_ord_type)]
+            #[allow(clippy::non_canonical_partial_ord_impl)]
             fn partial_cmp(&self, other: &Self) -> ::std::option::Option<::std::cmp::Ordering> {
                 ::std::option::Option::Some(::std::cmp::Ord::cmp(self, other))
             }
@@ -253,6 +315,13 @@ macro_rules! manual_braid {
         impl ::std::cmp::PartialEq<$Borrowed> for $Owned {
             #[inline]
             fn eq(&self, other: &$Borrowed) -> bool {
+                self.as_str() == other.as_str()
+            }
+        }
+
+        impl ::std::cmp::PartialEq<&'_ $Owned> for $Owned {
+            #[inline]
+            fn eq(&self, other: &&$Owned) -> bool {
                 self.as_str() == other.as_str()
             }
         }
@@ -341,13 +410,6 @@ macro_rules! manual_braid {
             }
         }
 
-        impl ::std::fmt::Debug for $Borrowed {
-            #[inline]
-            fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
-                <str as ::std::fmt::Debug>::fmt(&self.0, f)
-            }
-        }
-
         impl ::std::fmt::Display for $Borrowed {
             #[inline]
             fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
@@ -385,6 +447,119 @@ macro_rules! manual_braid {
             }
         }
 
+        impl<'a> From<&'a Vec<&'a $Owned>>
+            for $crate::collection::Collection<'a, $Owned>
+        {
+            fn from(v: &'a Vec<&'a $Owned>) -> Self { Self::Borrowed(::std::borrow::Cow::from(v)) }
+        }
+
+        impl<'a> From<&'a Vec<&'a str>>
+            for $crate::collection::Collection<'a, $Owned>
+        {
+            fn from(v: &'a Vec<&'a str>) -> Self { Self::RefStr(::std::borrow::Cow::from(v)) }
+        }
+
+        impl<'a> From<&'a Vec<String>>
+            for $crate::collection::Collection<'a, $Owned>
+        {
+            fn from(v: &'a Vec<String>) -> Self { Self::OwnedString(::std::borrow::Cow::from(v)) }
+        }
+
+        impl<'a> From<Vec<&'a $Borrowed>>
+            for $crate::collection::Collection<'a, $Owned>
+        {
+            fn from(v: Vec<&'a $Borrowed>) -> Self { Self::Ref(::std::borrow::Cow::from(v)) }
+        }
+
+        impl<'a> From<&'a [&'a $Borrowed]>
+            for $crate::collection::Collection<'a, $Owned>
+        {
+            fn from(v: &'a [&'a $Borrowed]) -> Self { Self::Ref(::std::borrow::Cow::from(v)) }
+        }
+
+        impl From<Vec<String>>
+            for $crate::collection::Collection<'_, $Owned>
+        {
+            fn from(v: Vec<String>) -> Self { Self::OwnedString(::std::borrow::Cow::from(v)) }
+        }
+
+        impl<'a> From<&'a [String]>
+            for $crate::collection::Collection<'a, $Owned>
+        {
+            fn from(v: &'a [String]) -> Self { Self::OwnedString(::std::borrow::Cow::from(v)) }
+        }
+
+        impl<'a> From<Vec<&'a String>>
+            for $crate::collection::Collection<'a, $Owned>
+        {
+            fn from(v: Vec<&'a String>) -> Self { Self::BorrowedString(::std::borrow::Cow::from(v)) }
+        }
+
+        impl<'a> From<&'a [&'a String]>
+            for $crate::collection::Collection<'a, $Owned>
+        {
+            fn from(v: &'a [&'a String]) -> Self { Self::BorrowedString(::std::borrow::Cow::from(v)) }
+        }
+
+        impl<'a> From<Vec<&'a str>>
+            for $crate::collection::Collection<'a, $Owned>
+        {
+            fn from(v: Vec<&'a str>) -> Self { Self::RefStr(::std::borrow::Cow::from(v)) }
+        }
+
+        impl<'a> From<&'a [&'a str]>
+            for $crate::collection::Collection<'a, $Owned>
+        {
+            fn from(v: &'a [&'a str]) -> Self { Self::RefStr(::std::borrow::Cow::from(v)) }
+        }
+
+        impl<'a, const N: usize> From<&'a [&'a str; N]>
+            for $crate::collection::Collection<'a, $Owned>
+        {
+            fn from(v: &'a [&'a str; N]) -> Self { Self::RefStr(::std::borrow::Cow::from(v.as_slice())) }
+        }
+
+        impl<'a, const N: usize> From<&'a [$Owned; N]>
+            for $crate::collection::Collection<'a, $Owned>
+        {
+            fn from(v: &'a [$Owned; N]) -> Self { Self::Owned(::std::borrow::Cow::from(v.as_slice())) }
+        }
+
+        impl<'a, const N: usize> From<&'a [String; N]>
+            for $crate::collection::Collection<'a, $Owned>
+        {
+            fn from(v: &'a [String; N]) -> Self { Self::OwnedString(::std::borrow::Cow::from(v.as_slice())) }
+        }
+
+        impl<'a, const N: usize> From<&'a [&'a $Owned; N]>
+            for $crate::collection::Collection<'a, $Owned>
+        {
+            fn from(v: &'a [&'a $Owned; N]) -> Self { Self::Borrowed(::std::borrow::Cow::from(v.as_slice())) }
+        }
+
+        impl<'a, const N: usize> From<&'a [&'a $Borrowed; N]>
+            for $crate::collection::Collection<'a, $Owned>
+        {
+            fn from(v: &'a [&'a $Borrowed; N]) -> Self { Self::Ref(::std::borrow::Cow::Borrowed(v.as_slice())) }
+        }
+
+        impl<'a> From<&'a $Owned>
+            for $crate::collection::Collection<'a, $Owned>
+        {
+            fn from(v: &'a $Owned) -> Self { Self::Owned(::std::borrow::Cow::from(std::slice::from_ref(v))) }
+        }
+
+        impl<'a> From<&'a &'a $Borrowed>
+            for $crate::collection::Collection<'a, $Owned>
+        {
+            fn from(v: &'a &'a $Borrowed) -> Self { Self::Ref(::std::borrow::Cow::from(std::slice::from_ref(v))) }
+        }
+
+        impl<'a> From<&'a &'a str>
+            for $crate::collection::Collection<'a, $Owned>
+        {
+            fn from(v: &'a &'a str) -> Self { Self::RefStr(::std::borrow::Cow::from(std::slice::from_ref(v))) }
+        }
     }
 }
 

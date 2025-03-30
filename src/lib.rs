@@ -7,6 +7,9 @@
 #[macro_use]
 #[doc(hidden)]
 pub mod macros;
+mod collection;
+
+pub use collection::{Collection, CollectionIter};
 
 /// Convert a type into a [`Cow`](std::borrow::Cow)
 pub trait IntoCow<'a, Ref: ?Sized>
@@ -57,15 +60,24 @@ where
 
 mod basic;
 // cc: https://github.com/rust-lang/rust/issues/83428, can't use glob imports and keep the modules private
+#[cfg(feature = "chat")]
+/// types for chat
+pub mod chat;
 #[cfg(feature = "color")]
 /// types for colors
 pub mod color;
 #[cfg(feature = "emote")]
 /// types for emotes
 pub mod emote;
+#[cfg(feature = "entitlement")]
+/// types for entitlements
+pub mod entitlement;
 #[cfg(feature = "eventsub")]
 /// types for eventsub related things
 pub mod eventsub;
+#[cfg(feature = "extension")]
+/// types for extensions
+pub mod extension;
 #[cfg(feature = "goal")]
 /// types for goals
 pub mod goal;
@@ -90,12 +102,18 @@ pub mod user;
 
 pub use basic::*;
 
+#[cfg(feature = "chat")]
+pub use crate::chat::*;
 #[cfg(feature = "color")]
 pub use crate::color::*;
 #[cfg(feature = "emote")]
 pub use crate::emote::*;
+#[cfg(feature = "entitlement")]
+pub use crate::entitlement::*;
 #[cfg(feature = "eventsub")]
 pub use crate::eventsub::*;
+#[cfg(feature = "extension")]
+pub use crate::extension::*;
 #[cfg(feature = "goal")]
 pub use crate::goal::*;
 #[cfg(feature = "moderation")]
@@ -158,6 +176,7 @@ mod tests {
     use super::*;
 
     #[test]
+    #[allow(clippy::needless_borrows_for_generic_args)]
     fn lol() {
         assert!(broadcaster_id("literal"));
         assert!(!broadcaster_id(String::from("string")));
@@ -205,5 +224,24 @@ mod tests {
             id: broadcaster_id.into_cow(),
         };
         matches!(k.id, std::borrow::Cow::Borrowed(_))
+    }
+
+    #[test]
+    fn debug_output_shown() {
+        let uid = UserIdRef::from_static("my-user-id");
+        let owned_uid = uid.to_owned();
+
+        assert_eq!(format!("{uid:?}"), "\"my-user-id\"");
+        assert_eq!(format!("{owned_uid:?}"), "\"my-user-id\"");
+    }
+
+    #[test]
+    #[cfg(feature = "stream")]
+    fn debug_output_hidden() {
+        let key = StreamKey::from_static("my-stream-key");
+        let owned_key = key.to_owned();
+
+        assert_eq!(format!("{key:?}"), "[redacted stream key]");
+        assert_eq!(format!("{owned_key:?}"), "[redacted stream key]");
     }
 }

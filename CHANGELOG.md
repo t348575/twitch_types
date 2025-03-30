@@ -4,7 +4,36 @@
 
 ## [Unreleased] - ReleaseDate
 
-[Commits](https://github.com/twitch-rs/twitch_types/compare/v0.4.4...Unreleased)
+[Commits](https://github.com/twitch-rs/twitch_types/compare/v0.4.8...Unreleased)
+
+## [v0.4.8] - 2024-11-21
+
+[Commits](https://github.com/twitch-rs/twitch_types/compare/v0.4.7...v0.4.8)
+
+- Added `ContentClassificationId::DebatedSocialIssuesAndPolitics`
+- Changed `ResubscriptionEmote` to `EmoteOccurrence`
+- Deprecated `ResubscriptionEmote` (alias to `EmoteOccurrence`)
+
+## [v0.4.7] - 2024-11-06
+
+[Commits](https://github.com/twitch-rs/twitch_types/compare/v0.4.6...v0.4.7)
+
+- Added `StreamKey` (feature `stream`)
+
+## [v0.4.6] - 2024-10-13
+
+[Commits](https://github.com/twitch-rs/twitch_types/compare/v0.4.5...v0.4.6)
+
+- Added `SharedChatSessionId` and `WhisperId` (feature `chat`)
+- Added `EntitlementId`, `BenefitId`, `OrganizationId`, and `EntitlementCampaignId` (feature `entitlements`)
+- Added `ConduitId` and `ConduitShardId` (feature `eventsub`)
+- Added `ExtensionId` (feature `extensions`)
+- Added `UnbanRequestid` (feature `moderation`)
+- Added `CclId`, `GuestStarSessionId`, `GuestStarSlotId`, and `StreamMarkerId` (feature `stream`)
+
+## [v0.4.5] - 2024-04-15
+
+[Commits](https://github.com/twitch-rs/twitch_types/compare/v0.4.4...v0.4.5)
 
 ## [v0.4.4] - 2023-11-16
 

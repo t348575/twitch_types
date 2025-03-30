@@ -78,6 +78,36 @@ manual_braid! {
 }
 impl_extra!(IgdbId, IgdbIdRef);
 
+manual_braid! {
+    /// A Guest Star Session ID
+    pub struct GuestStarSessionId;
+    pub struct GuestStarSessionIdRef;
+}
+impl_extra!(GuestStarSessionId, GuestStarSessionIdRef);
+
+manual_braid! {
+    /// A Guest Star Slot ID
+    pub struct GuestStarSlotId;
+    pub struct GuestStarSlotIdRef;
+}
+impl_extra!(GuestStarSlotId, GuestStarSlotIdRef);
+
+manual_braid! {
+    /// A stream marker ID
+    pub struct StreamMarkerId;
+    pub struct StreamMarkerIdRef;
+}
+impl_extra!(StreamMarkerId, StreamMarkerIdRef);
+
+manual_braid! {
+    redact("stream key");
+
+    /// A Stream Key (hidden [Debug] output)
+    pub struct StreamKey;
+    pub struct StreamKeyRef;
+}
+impl_extra!(StreamKey, StreamKeyRef);
+
 /// A game or category as defined by Twitch
 #[derive(PartialEq, Eq, Debug, Clone)]
 #[cfg_attr(
@@ -318,6 +348,10 @@ impl core::fmt::Display for CommercialLengthParseError {
 #[cfg_attr(feature = "serde", derive(serde_derive::Deserialize))]
 #[cfg_attr(feature = "serde", serde(field_identifier))]
 pub enum ContentClassificationId {
+    /// Politics and Sensitive Social Issues
+    ///
+    /// Discussions or debates about politics or sensitive social issues such as elections, civic integrity, military conflict, and civil rights in a polarizing manner.
+    DebatedSocialIssuesAndPolitics,
     /// Drugs, Intoxication, or Excessive Tobacco Use
     ///
     /// Excessive tobacco glorification or promotion, any marijuana consumption/use, legal drug and alcohol induced intoxication, discussions of illegal drugs.
@@ -351,6 +385,9 @@ impl Serialize for ContentClassificationId {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where S: serde::Serializer {
         serializer.serialize_str(match self {
+            ContentClassificationId::DebatedSocialIssuesAndPolitics => {
+                "DebatedSocialIssuesAndPolitics"
+            }
             ContentClassificationId::DrugsIntoxication => "DrugsIntoxication",
             ContentClassificationId::SexualThemes => "SexualThemes",
             ContentClassificationId::ViolentGraphic => "ViolentGraphic",

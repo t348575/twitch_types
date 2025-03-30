@@ -1,6 +1,6 @@
 [package]
 name = "twitch_types"
-version = "0.4.4"
+version = "0.4.8"
 edition = "2021"
 repository = "https://github.com/twitch-rs/twitch_types"
 license = "MIT OR Apache-2.0"
@@ -35,13 +35,17 @@ utoipa = { version = "4", optional = true }
 [features]
 default = []
 utoipa = ["dep:utoipa"]
+
+chat = []
 emote = ["serde"]
+entitlement = []
 moderation = ["serde"]
 points = ["serde"]
 stream = ["serde"]
 timestamp = []
 user = ["serde"]
 goal = ["serde"]
+extension = []
 eventsub = []
 sub = []
 color = ["serde"]
@@ -57,3 +61,6 @@ members = ["xtask"]
 all-features = true
 rustc-args = ["--cfg", "nightly"]
 rustdoc-args = ["--cfg", "nightly"]
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(nightly)'] }
