@@ -6,18 +6,23 @@ manual_braid! {
 impl_extra!(numeric, UserId, UserIdRef);
 
 #[cfg(feature = "utoipa")]
-impl<'__s> utoipa::ToSchema<'__s> for UserId {
-    fn aliases() -> Vec<(&'__s str, utoipa::openapi::schema::Schema)> {
-        vec![]
+impl utoipa::PartialSchema for UserId {
+    fn schema() -> utoipa::openapi::RefOr<utoipa::openapi::schema::Schema> {
+        utoipa::openapi::ObjectBuilder::new()
+            .schema_type(utoipa::openapi::schema::SchemaType::Type(utoipa::openapi::schema::Type::String))
+            .into()
     }
+}
 
-    fn schema() -> (
-        &'__s str,
-        utoipa::openapi::RefOr<utoipa::openapi::schema::Schema>,
+#[cfg(feature = "utoipa")]
+impl utoipa::ToSchema for UserId {
+    fn schemas(
+        schemas: &mut Vec<(
+            String,
+            utoipa::openapi::RefOr<utoipa::openapi::schema::Schema>,
+        )>,
     ) {
-        ("UserId", utoipa::openapi::ObjectBuilder::new()
-            .schema_type(utoipa::openapi::SchemaType::String)
-            .into())
+        schemas.push(("UserId".to_owned(), <UserId as utoipa::PartialSchema>::schema()));
     }
 }
 
