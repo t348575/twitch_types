@@ -33,12 +33,54 @@ manual_braid! {
 }
 impl_extra!(DisplayName, DisplayNameRef);
 
+#[cfg(feature = "utoipa")]
+impl utoipa::PartialSchema for DisplayName {
+    fn schema() -> utoipa::openapi::RefOr<utoipa::openapi::schema::Schema> {
+        utoipa::openapi::ObjectBuilder::new()
+            .schema_type(utoipa::openapi::schema::SchemaType::Type(utoipa::openapi::schema::Type::String))
+            .into()
+    }
+}
+
+#[cfg(feature = "utoipa")]
+impl utoipa::ToSchema for DisplayName {
+    fn schemas(
+        schemas: &mut Vec<(
+            String,
+            utoipa::openapi::RefOr<utoipa::openapi::schema::Schema>,
+        )>,
+    ) {
+        schemas.push(("DisplayName".to_owned(), <DisplayName as utoipa::PartialSchema>::schema()));
+    }
+}
+
 manual_braid! {
     /// A nickname, not capitalized.
     pub struct Nickname;
     pub struct NicknameRef;
 }
 impl_extra!(ascii, Nickname, NicknameRef);
+
+#[cfg(feature = "utoipa")]
+impl utoipa::PartialSchema for Nickname {
+    fn schema() -> utoipa::openapi::RefOr<utoipa::openapi::schema::Schema> {
+        utoipa::openapi::ObjectBuilder::new()
+            .schema_type(utoipa::openapi::schema::SchemaType::Type(utoipa::openapi::schema::Type::String))
+            .into()
+    }
+}
+
+#[cfg(feature = "utoipa")]
+impl utoipa::ToSchema for Nickname {
+    fn schemas(
+        schemas: &mut Vec<(
+            String,
+            utoipa::openapi::RefOr<utoipa::openapi::schema::Schema>,
+        )>,
+    ) {
+        schemas.push(("Nickname".to_owned(), <Nickname as utoipa::PartialSchema>::schema()));
+    }
+}
 
 /// A username, also specified as login. Should not be capitalized.
 pub type UserName = Nickname;
