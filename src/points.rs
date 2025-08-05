@@ -34,6 +34,27 @@ manual_braid! {
 }
 impl_extra!(PredictionId, PredictionIdRef);
 
+#[cfg(feature = "utoipa")]
+impl utoipa::PartialSchema for PredictionId {
+    fn schema() -> utoipa::openapi::RefOr<utoipa::openapi::schema::Schema> {
+        utoipa::openapi::ObjectBuilder::new()
+            .schema_type(utoipa::openapi::schema::SchemaType::Type(utoipa::openapi::schema::Type::String))
+            .into()
+    }
+}
+
+#[cfg(feature = "utoipa")]
+impl utoipa::ToSchema for PredictionId {
+    fn schemas(
+        schemas: &mut Vec<(
+            String,
+            utoipa::openapi::RefOr<utoipa::openapi::schema::Schema>,
+        )>,
+    ) {
+        schemas.push(("PredictionId".to_owned(), <PredictionId as utoipa::PartialSchema>::schema()));
+    }
+}
+
 manual_braid! {
     /// A prediction choice ID
     pub struct PredictionOutcomeId;
@@ -168,8 +189,8 @@ pub enum PredictionStatus {
     feature = "serde",
     derive(serde_derive::Serialize, serde_derive::Deserialize)
 )]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[cfg_attr(feature = "deny_unknown_fields", serde(deny_unknown_fields))]
-#[non_exhaustive]
 pub struct PredictionOutcome {
     /// ID for the outcome.
     pub id: String,
@@ -192,6 +213,7 @@ pub struct PredictionOutcome {
     feature = "serde",
     derive(serde_derive::Serialize, serde_derive::Deserialize)
 )]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[cfg_attr(feature = "deny_unknown_fields", serde(deny_unknown_fields))]
 #[non_exhaustive]
 pub struct PredictionTopPredictors {
